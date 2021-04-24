@@ -1,4 +1,4 @@
-const CANVAS_SIZE = [400, 400];
+const CANVAS_SIZE = [800, 800];
 const canvas = new Rectangle(
     0, 
     0, 
@@ -8,9 +8,9 @@ const canvas = new Rectangle(
 
 let myPoint = new Point(200, 200);
 let myPath = new Path({
-	strokeColor: new Color(0.5, 0, 0.5),
-	strokeWidth: 10,
-	strokeCap: 'round'
+    strokeColor: new Color(0.5, 0, 0.5),
+    strokeWidth: 10,
+    strokeCap: 'round'
 });
 myPath.add(myPoint);
 
@@ -35,3 +35,4 @@ function onFrame(event) {
     myPath.strokeColor.hue += 0.5;
     myPath.smooth();
 }
+
