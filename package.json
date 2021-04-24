@@ -3,11 +3,17 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "scripts": {
+    "serve": "serve"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "acorn": "^8.2.0",
     "paper": "^0.12.15"
+  },
+  "devDependencies": {
+    "serve": "^11.3.2"
   }
 }
