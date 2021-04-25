@@ -1,19 +1,52 @@
+// Photinus macdermotti a.k.a. Father Mac’s firefly 
+// From https://www.nps.gov/grsm/learn/nature/firefly-flash-patterns.htm
+// The pattern for this species is a double flash of yellow light 
+// with the two flashes about 1½-2 seconds apart with a brief 4-5 second pause 
+// and a repeat of the double flash. 
+
+FLASH_CYCLE_DURATION = 5000.0;
+FLASH_CYCLE_1_ON = 0.0;
+FLASH_CYCLE_1_OFF = 500.0;
+FLASH_CYCLE_2_ON = 1500.0
+FLASH_CYCLE_2_OFF = 2000.0;
+FLASH_STATES = 3;
+FLASH_DURATION = 75;
+NUMBER_OF_FLIES = 20;
+
 class Fly {
     constructor(maxWidth, maxHeight) {
         this.maxWidth = maxWidth;
-        this.maxHeight = maxHeight * 0.25;
-        this.position = (
-                            new Point(this.maxWidth, this.maxHeight) *  Point.random()
-                        ) + new Point(0, maxHeight * 0.75);
+        this.maxHeight = maxHeight;
         this.speed = (Math.random() * 20.0) - 10.0;
-        this.size = Math.random() * 3.0;
-        this.intervalBetweenFlash = (Math.random() * 50) + 475;
-        const deltaToLastFlash = Math.random() * 15000;
-        this.timeOfLastFlash = Date.now() - deltaToLastFlash;
-        this.flashCount = deltaToLastFlash < this.intervalBetweenFlash ? (Math.random() * 6) : 0;
-        this.shape = null;
+        this.initPositionAttributes();
+        this.initFlashAttributes();
 
-        this.flashOff = this.flashOff.bind(this);
+        this.shape = null;
+    }
+
+    initFlashAttributes() {
+        this.size = (Math.random() * 2.5) + 2.0;
+
+        this.flashCycleOffset = Math.random() * FLASH_CYCLE_DURATION
+        if (this.flashCycleOffset < FLASH_CYCLE_1_OFF) {
+            this.flashCount = 1;
+        } else if (this.flashCycleOffset < FLASH_CYCLE_2_OFF) {
+            this.flashCount = 2;
+        } else {
+            this.flashCount = 0;
+        }
+        this.lastFlashOn = 0;
+    }
+
+    initPositionAttributes() {
+        // this.maxHeight = maxHeight * 0.3;
+        // this.position = (
+        //             new Point(this.maxWidth, this.maxHeight) *  Point.random()
+        //         ) + new Point(0, maxHeight * 0.5);
+        // this.maxHeight = maxHeight;
+        this.position = (
+                    new Point(this.maxWidth, this.maxHeight) *  Point.random()
+                );
     }
 
     draw() {
@@ -26,34 +59,28 @@ class Fly {
         this.shape.opacity = 0;
     }
 
-    queueFlash() {
-        // if ((this.shape.opacity + this.brightness) < 0 || (this.shape.opacity + this.brightness) > 1) {
-        //     this.brightness = this.brightness * -1;
-        // }
-        // this.shape.opacity = this.shape.opacity + this.brightness;
-
+    flicker() {
         const now = Date.now();
-        const randomDuration = (Math.random() * 15000) + 3000;
-        const halfishASecond = this.intervalBetweenFlash;
-        const flashDeltaToNow = now - this.timeOfLastFlash;
+        const flashCyclePosition = (now + this.flashCycleOffset) % FLASH_CYCLE_DURATION;
 
-        // debugger;
-        // console.log(`this.flashCount ${this.flashCount} flashDeltaToNow ${flashDeltaToNow} randomDuration ${randomDuration} this.timeOfLastFlash ${this.timeOfLastFlash}`);
-        if (flashDeltaToNow > halfishASecond && this.flashCount > 0 && this.flashCount < 6) { // Ligthning bugs flash 6 times about every 1/2 second
-            window.setInterval(this.flashOff, 100);
+        if (this.shape.opacity && (now - this.lastFlashOn) > FLASH_DURATION) {
+            this.shape.opacity = 0;
+            this.lastFlashOn = 0;
+        } else if (flashCyclePosition > FLASH_CYCLE_1_ON && flashCyclePosition < FLASH_CYCLE_1_OFF && this.flashCount < 1) {
             this.shape.opacity = 1;
-            this.timeOfLastFlash = now;
-            this.flashCount = (this.flashCount + 1) % 6;
-        } else if (flashDeltaToNow > randomDuration && this.flashCount === 0) {
-            window.setInterval(this.flashOff, 100);
-            this.shape.opacity = 1;
-            this.timeOfLastFlash = now;
+            this.lastFlashOn = now;
+            // window.setInterval(() => this.shape.opacity = 0, FLASH_DURATION);
             this.flashCount = 1;
+            // window.setInterval(() => this.shape.opacity = 1, durationToNextFlash);
+            // window.setInterval(() => {this.shape.opacity = 0; this.flashActive = false}, durationToNextFlash +  durationToNextFlash);
+        } else if (flashCyclePosition > FLASH_CYCLE_2_ON && flashCyclePosition < FLASH_CYCLE_2_OFF && this.flashCount < 2) {
+            this.shape.opacity = 1;
+            this.lastFlashOn = now;
+            // window.setInterval(() => this.shape.opacity = 0, FLASH_DURATION);
+            this.flashCount = 2;
+        } else if (flashCyclePosition > FLASH_CYCLE_2_OFF && this.flashCount === 2) {
+            this.flashCount = 0;
         }
-    }
-
-    flashOff() {
-        this.shape.opacity = 0;
     }
 
     move() {
@@ -78,7 +105,7 @@ const canvas = new Rectangle(
     CANVAS_SIZE[1]
 );
 
-const generateFireFlies = function(flyCount = 150) {
+const generateFireFlies = function(flyCount = NUMBER_OF_FLIES) {
     const flies = []
     for(let fly = 0; fly < flyCount; fly++) {        
         flies[fly] = new Fly(CANVAS_SIZE[0], CANVAS_SIZE[1]);
@@ -89,16 +116,15 @@ const generateFireFlies = function(flyCount = 150) {
 
 const flies = generateFireFlies();
 
-function onFrame(_event) {
-    if (_event.count > 2000) {
+function onFrame(event) {
+    if (event.count > 2000) {
         return;
     }
     flies.forEach(fly => {
-        fly.queueFlash();
-        fly.move();
+        fly.flicker();
+        // fly.move();
     });
 }
-
 
 // let myPoint = new Point(200, 200);
 // let myPath = new Path({
