@@ -8,6 +8,7 @@
 // Colour converter https://academo.org/demos/wavelength-to-colour-relationship/
 
 FLASH_COLOUR = '#deff00'; 
+FLASH_BLUR_COLOUR = '#909666';
 FLASH_CYCLE_DURATION = 6000.0;
 FLASH_CYCLE_1_ON = 0.0;
 FLASH_CYCLE_1_OFF = 500.0;
@@ -58,18 +59,22 @@ class Macdermotti {
     }
 
     initShape() {
-        this.size = Math.random() * 4.5;
+        const size = Math.random() * 4.5;
         this.shape = new Shape.Circle(
             new Point(0, 0),
-            this.size,
+            size,
         );
+        // console.log(size, this.shape.size, this.shape.radius);
 
+        this.shape.shadowColor = FLASH_BLUR_COLOUR;
+        this.shape.shadowBlur = 9.5 - size;
         this.shape.fillColor = FLASH_COLOUR;
         this.shape.opacity = 0;
+        this.shape.blendMode = 'soft-light';
     }
 
     initSpeed() {
-        this.speed = new Point(this.size * 1.0, this.size * 0.25) * Point.random();
+        this.speed = new Point(this.shape.radius * 1.0, this.shape.radius * 0.25) * Point.random();
         this.speed.angle = Math.random() < 0.5 ? Math.random() * -20 : 180 + (Math.random() * 20);
     }
 
