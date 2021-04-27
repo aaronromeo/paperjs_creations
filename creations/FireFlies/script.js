@@ -3,31 +3,38 @@
 // The pattern for this species is a double flash of yellow light 
 // with the two flashes about 1½-2 seconds apart with a brief 4-5 second pause 
 // and a repeat of the double flash. 
+// https://conference.ifas.ufl.edu/firefly/Poster%20Presentations/9%20-%20De%20Cock%20-%20Call%20for%20a%20Discussion.pdf
 
-FLASH_CYCLE_DURATION = 5000.0;
+// Colour converter https://academo.org/demos/wavelength-to-colour-relationship/
+
+FLASH_COLOUR = '#deff00'; 
+FLASH_CYCLE_DURATION = 6000.0;
 FLASH_CYCLE_1_ON = 0.0;
 FLASH_CYCLE_1_OFF = 500.0;
 FLASH_CYCLE_2_ON = 1500.0
 FLASH_CYCLE_2_OFF = 2000.0;
 FLASH_STATES = 3;
-FLASH_DURATION = 75;
-NUMBER_OF_FLIES = 20;
+MIN_FLASH_DURATION = 200;
+FLASH_DURATION_VARIABILITY = 800;
+NUMBER_OF_FLIES = 15;
 
-class Fly {
-    constructor(maxWidth, maxHeight) {
+class Macdermotti {
+    constructor(maxWidth, maxHeight, offsetHeight) {
+        this.male = Math.random() < 0.5 ? true : false;
+        this.offsetHeight = offsetHeight;
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
-        this.speed = (Math.random() * 20.0) - 10.0;
+
+        this.initShape();
         this.initPositionAttributes();
         this.initFlashAttributes();
-
-        this.shape = null;
+        this.initSpeed();
     }
 
     initFlashAttributes() {
-        this.size = (Math.random() * 2.5) + 2.0;
-
-        this.flashCycleOffset = Math.random() * FLASH_CYCLE_DURATION
+        this.flashCycleOffset = this.male ? 
+            Math.random() * FLASH_CYCLE_DURATION * 0.75 :
+            (Math.random() * FLASH_CYCLE_DURATION * 0.5) + FLASH_CYCLE_DURATION * 0.5;
         if (this.flashCycleOffset < FLASH_CYCLE_1_OFF) {
             this.flashCount = 1;
         } else if (this.flashCycleOffset < FLASH_CYCLE_2_OFF) {
@@ -39,44 +46,48 @@ class Fly {
     }
 
     initPositionAttributes() {
-        // this.maxHeight = maxHeight * 0.3;
-        // this.position = (
-        //             new Point(this.maxWidth, this.maxHeight) *  Point.random()
-        //         ) + new Point(0, maxHeight * 0.5);
-        // this.maxHeight = maxHeight;
-        this.position = (
-                    new Point(this.maxWidth, this.maxHeight) *  Point.random()
-                );
+        if (this.male) {
+            this.shape.position = (
+                new Point(this.maxWidth, this.maxHeight * 0.5) *  Point.random()
+            ) + new Point(0, this.offsetHeight);
+        } else {
+            this.shape.position = (
+                new Point(this.maxWidth, this.maxHeight * 0.5) *  Point.random()
+            ) + new Point(0, this.maxHeight * 0.5 + this.offsetHeight);
+        }
     }
 
-    draw() {
+    initShape() {
+        this.size = Math.random() * 4.5;
         this.shape = new Shape.Circle(
-            this.position,
+            new Point(0, 0),
             this.size,
         );
-        this.shape.fillColor = '#eef2ae';
-        this.shape.fillColor.hue = this.shape.fillColor.hue + (Math.random() * 10) - 5;
+
+        this.shape.fillColor = FLASH_COLOUR;
         this.shape.opacity = 0;
+    }
+
+    initSpeed() {
+        this.speed = new Point(this.size * 1.0, this.size * 0.25) * Point.random();
+        this.speed.angle = Math.random() < 0.5 ? Math.random() * -20 : 180 + (Math.random() * 20);
     }
 
     flicker() {
         const now = Date.now();
         const flashCyclePosition = (now + this.flashCycleOffset) % FLASH_CYCLE_DURATION;
+        const flashDuration = this.male ? (MIN_FLASH_DURATION + Math.random() * FLASH_DURATION_VARIABILITY) : MIN_FLASH_DURATION;
 
-        if (this.shape.opacity && (now - this.lastFlashOn) > FLASH_DURATION) {
+        if (this.shape.opacity && (now - this.lastFlashOn) > flashDuration) {
             this.shape.opacity = 0;
             this.lastFlashOn = 0;
-        } else if (flashCyclePosition > FLASH_CYCLE_1_ON && flashCyclePosition < FLASH_CYCLE_1_OFF && this.flashCount < 1) {
+        } else if (this.male && flashCyclePosition > FLASH_CYCLE_1_ON && flashCyclePosition < FLASH_CYCLE_1_OFF && this.flashCount < 1) {
             this.shape.opacity = 1;
             this.lastFlashOn = now;
-            // window.setInterval(() => this.shape.opacity = 0, FLASH_DURATION);
             this.flashCount = 1;
-            // window.setInterval(() => this.shape.opacity = 1, durationToNextFlash);
-            // window.setInterval(() => {this.shape.opacity = 0; this.flashActive = false}, durationToNextFlash +  durationToNextFlash);
         } else if (flashCyclePosition > FLASH_CYCLE_2_ON && flashCyclePosition < FLASH_CYCLE_2_OFF && this.flashCount < 2) {
             this.shape.opacity = 1;
             this.lastFlashOn = now;
-            // window.setInterval(() => this.shape.opacity = 0, FLASH_DURATION);
             this.flashCount = 2;
         } else if (flashCyclePosition > FLASH_CYCLE_2_OFF && this.flashCount === 2) {
             this.flashCount = 0;
@@ -84,32 +95,34 @@ class Fly {
     }
 
     move() {
-        // const newRadiusDelta = (Math.random() * 0.1) - 0.05;
-        // console.log(this.shape.radius, newRadiusDelta);
-        // this.shape.radius = this.shape.radius + newRadiusDelta;
-
-        // const myVector = (
-        //     new Point(this.speed, this.speed) * Point.random()
-        // ).normalize(Math.random() * 10);
-        // myVector.angle = Math.random() * 30;
-        // const newPosition = (this.shape.position + myVector) % new Point(this.maxWidth, this.maxHeight);
-        // this.shape.position = newPosition;
+        if (!this.male) {
+            return;
+        }
+        
+        if (this.flashCount === 2) {
+            this.speed.angle = this.speed.angle > -90 ? this.speed.angle - 2 : this.speed.angle + 2;
+        } else if (this.flashCount == 0) {
+            this.initSpeed();
+        }
+        this.shape.position = this.shape.position + this.speed;        
+        
+        const boundingBox = new Rectangle(0, this.offsetHeight, this.maxWidth, this.maxHeight);
+        if (this.flashCount == 0 && !boundingBox.contains(this.shape.position)) {
+            this.initPositionAttributes();
+        }
     }
 }
 
-const CANVAS_SIZE = [window.innerWidth, window.innerHeight];
-const canvas = new Rectangle(
-    0, 
-    0, 
-    CANVAS_SIZE[0],
-    CANVAS_SIZE[1]
-);
+const CANVAS_SIZE = [
+    document.querySelector('#myCanvas').clientWidth, 
+    document.querySelector('#myCanvas').clientHeight * 0.5,
+];
+const CANVAS_OFFSET = document.querySelector('#myCanvas').clientHeight * 0.5;
 
 const generateFireFlies = function(flyCount = NUMBER_OF_FLIES) {
     const flies = []
     for(let fly = 0; fly < flyCount; fly++) {        
-        flies[fly] = new Fly(CANVAS_SIZE[0], CANVAS_SIZE[1]);
-        flies[fly].draw();
+        flies[fly] = new Macdermotti(CANVAS_SIZE[0], CANVAS_SIZE[1], CANVAS_OFFSET);
     }
     return flies;
 }
@@ -117,42 +130,8 @@ const generateFireFlies = function(flyCount = NUMBER_OF_FLIES) {
 const flies = generateFireFlies();
 
 function onFrame(event) {
-    if (event.count > 2000) {
-        return;
-    }
     flies.forEach(fly => {
         fly.flicker();
-        // fly.move();
+        fly.move();
     });
 }
-
-// let myPoint = new Point(200, 200);
-// let myPath = new Path({
-//     strokeColor: new Color(0.5, 0, 0.5),
-//     strokeWidth: 10,
-//     strokeCap: 'round'
-// });
-// myPath.add(myPoint);
-
-// function getPoint(start) {
-//     const myVector = (
-//         new Point(10,10) * Point.random()
-//     ).normalize(Math.random() * 100);
-//     myVector.angle = Math.random() * 360;
-//     start = start + myVector;
-//     return start;
-// }
-
-// function onFrame(event) {
-//     let newPoint = getPoint(myPoint);
-//     while (!newPoint.isInside(canvas)) {
-//         newPoint = getPoint(myPoint);
-//     }
-//     myPath.add(newPoint);
-//     if (myPath.segments.length >= 20) {
-//         myPath.removeSegment(0);
-//     }
-//     myPath.strokeColor.hue += 0.5;
-//     myPath.smooth();
-// }
-
