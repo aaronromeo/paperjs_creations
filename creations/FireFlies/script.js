@@ -20,9 +20,8 @@ FLASH_DURATION_VARIABILITY = 800;
 NUMBER_OF_FLIES = 15;
 
 class Macdermotti {
-    constructor(maxWidth, maxHeight, offsetHeight) {
+    constructor(maxWidth, maxHeight) {
         this.male = Math.random() < 0.5 ? true : false;
-        this.offsetHeight = offsetHeight;
         this.maxWidth = maxWidth;
         this.maxHeight = maxHeight;
 
@@ -47,15 +46,11 @@ class Macdermotti {
     }
 
     initPositionAttributes() {
-        if (this.male) {
-            this.shape.position = (
-                new Point(this.maxWidth, this.maxHeight * 0.5) *  Point.random()
-            ) + new Point(0, this.offsetHeight);
-        } else {
-            this.shape.position = (
-                new Point(this.maxWidth, this.maxHeight * 0.5) *  Point.random()
-            ) + new Point(0, this.maxHeight * 0.5 + this.offsetHeight);
-        }
+        let width = this.maxWidth * 1.0 * Math.random();
+        let height = this.maxHeight * 0.5 * Math.random();
+        this.shape.position = (
+            new Point(width, this.maxHeight - height)
+        );
     }
 
     initShape() {
@@ -64,7 +59,6 @@ class Macdermotti {
             new Point(0, 0),
             size,
         );
-        // console.log(size, this.shape.size, this.shape.radius);
 
         this.shape.shadowColor = FLASH_BLUR_COLOUR;
         this.shape.shadowBlur = 9.5 - size;
@@ -111,7 +105,7 @@ class Macdermotti {
         }
         this.shape.position = this.shape.position + this.speed;        
         
-        const boundingBox = new Rectangle(0, this.offsetHeight, this.maxWidth, this.maxHeight);
+        const boundingBox = new Rectangle(0, this.maxHeight * 0.5, this.maxWidth, this.maxHeight);
         if (this.flashCount == 0 && !boundingBox.contains(this.shape.position)) {
             this.initPositionAttributes();
         }
@@ -120,14 +114,14 @@ class Macdermotti {
 
 const CANVAS_SIZE = [
     document.querySelector('#myCanvas').clientWidth, 
-    document.querySelector('#myCanvas').clientHeight * 0.5,
+    document.querySelector('#myCanvas').clientHeight,
 ];
 const CANVAS_OFFSET = document.querySelector('#myCanvas').clientHeight * 0.5;
 
 const generateFireFlies = function(flyCount = NUMBER_OF_FLIES) {
     const flies = []
     for(let fly = 0; fly < flyCount; fly++) {        
-        flies[fly] = new Macdermotti(CANVAS_SIZE[0], CANVAS_SIZE[1], CANVAS_OFFSET);
+        flies[fly] = new Macdermotti(CANVAS_SIZE[0], CANVAS_SIZE[1]);
     }
     return flies;
 }
