@@ -9,23 +9,27 @@
 
 FLASH_COLOUR = '#deff00'; 
 FLASH_BLUR_COLOUR = '#909666';
-FLASH_CYCLE_DURATION = 6000.0;
+FLASH_CYCLE_DURATION = 6000;
 FLASH_CYCLE_1_ON = 0.0;
-FLASH_CYCLE_1_OFF = 500.0;
-FLASH_CYCLE_2_ON = 1500.0
-FLASH_CYCLE_2_OFF = 2000.0;
-FLASH_STATES = 3;
+FLASH_CYCLE_1_OFF = 500;
+FLASH_CYCLE_2_ON = 1500
+FLASH_CYCLE_2_OFF = 2000;
 MIN_FLASH_DURATION = 200;
 FLASH_DURATION_VARIABILITY = 800;
 NUMBER_OF_FLIES = 15;
+CANVAS_BORDER = 10;
+CANVAS_WIDTH = document.querySelector('#myCanvas').clientWidth - CANVAS_BORDER;
+CANVAS_HEIGHT = document.querySelector('#myCanvas').clientHeight - CANVAS_BORDER;
+CANVAS_OFFSET = CANVAS_HEIGHT * 0.5;
+NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH / 100.0);
 
 class Macdermotti {
-    constructor(maxWidth, maxHeight) {
-        this.male = Math.random() < 0.5 ? true : false;
-        this.maxWidth = maxWidth;
-        this.maxHeight = maxHeight;
+    constructor() {
+        this.male = 
+            Math.random() < 0.5 ? 
+            true : 
+            false;
 
-        this.initShape();
         this.initPositionAttributes();
         this.initFlashAttributes();
         this.initSpeed();
@@ -46,22 +50,19 @@ class Macdermotti {
     }
 
     initPositionAttributes() {
-        let width = this.maxWidth * 1.0 * Math.random();
-        let height = this.maxHeight * 0.5 * Math.random();
-        this.shape.position = (
-            new Point(width, this.maxHeight - height)
-        );
-    }
-
-    initShape() {
-        const size = Math.random() * 4.5;
+        let width = CANVAS_WIDTH * 1.0 * Math.random();
+        let height = CANVAS_HEIGHT * 0.5 * Math.random();
         this.shape = new Shape.Circle(
             new Point(0, 0),
-            size,
+            0,
         );
-
+        this.shape.position = (
+            new Point(width, CANVAS_HEIGHT - height)
+        );
+        this.shape.radius = 
+            (((this.shape.position.y - CANVAS_OFFSET) / CANVAS_OFFSET) * 3.5) + 1.0;
+        this.shape.shadowBlur = 20 - this.shape.radius;
         this.shape.shadowColor = FLASH_BLUR_COLOUR;
-        this.shape.shadowBlur = 9.5 - size;
         this.shape.fillColor = FLASH_COLOUR;
         this.shape.opacity = 0;
         this.shape.blendMode = 'soft-light';
@@ -105,23 +106,17 @@ class Macdermotti {
         }
         this.shape.position = this.shape.position + this.speed;        
         
-        const boundingBox = new Rectangle(0, this.maxHeight * 0.5, this.maxWidth, this.maxHeight);
+        const boundingBox = new Rectangle(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);        
         if (this.flashCount == 0 && !boundingBox.contains(this.shape.position)) {
             this.initPositionAttributes();
         }
     }
 }
 
-const CANVAS_SIZE = [
-    document.querySelector('#myCanvas').clientWidth, 
-    document.querySelector('#myCanvas').clientHeight,
-];
-const CANVAS_OFFSET = document.querySelector('#myCanvas').clientHeight * 0.5;
-
 const generateFireFlies = function(flyCount = NUMBER_OF_FLIES) {
     const flies = []
     for(let fly = 0; fly < flyCount; fly++) {        
-        flies[fly] = new Macdermotti(CANVAS_SIZE[0], CANVAS_SIZE[1]);
+        flies[fly] = new Macdermotti();
     }
     return flies;
 }
