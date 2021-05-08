@@ -21,7 +21,7 @@ CANVAS_BORDER = 10;
 CANVAS_WIDTH = document.querySelector('#myCanvas').clientWidth - CANVAS_BORDER;
 CANVAS_HEIGHT = document.querySelector('#myCanvas').clientHeight - CANVAS_BORDER;
 CANVAS_OFFSET = CANVAS_HEIGHT * 0.5;
-NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH / 100.0);
+NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH / 200.0);
 
 class Macdermotti {
     constructor() {
@@ -29,16 +29,17 @@ class Macdermotti {
             Math.random() < 0.5 ? 
             true : 
             false;
+        this.reset();
+    }
 
+    reset() {
         this.initPositionAttributes();
         this.initFlashAttributes();
         this.initSpeed();
     }
 
     initFlashAttributes() {
-        this.flashCycleOffset = this.male ? 
-            Math.random() * FLASH_CYCLE_DURATION * 0.75 :
-            (Math.random() * FLASH_CYCLE_DURATION * 0.5) + FLASH_CYCLE_DURATION * 0.5;
+        this.flashCycleOffset = Math.random() * FLASH_CYCLE_DURATION;
         if (this.flashCycleOffset < FLASH_CYCLE_1_OFF) {
             this.flashCount = 1;
         } else if (this.flashCycleOffset < FLASH_CYCLE_2_OFF) {
@@ -50,14 +51,14 @@ class Macdermotti {
     }
 
     initPositionAttributes() {
-        let width = CANVAS_WIDTH * 1.0 * Math.random();
-        let height = CANVAS_HEIGHT * 0.5 * Math.random();
+        let posX = CANVAS_WIDTH * 1.0 * Math.random();
+        let posY = CANVAS_HEIGHT * 0.25 * Math.random();
         this.shape = new Shape.Circle(
             new Point(0, 0),
             0,
         );
         this.shape.position = (
-            new Point(width, CANVAS_HEIGHT - height)
+            new Point(posX, CANVAS_HEIGHT - posY)
         );
         this.shape.radius = 
             (((this.shape.position.y - CANVAS_OFFSET) / CANVAS_OFFSET) * 3.5) + 1.0;
@@ -101,14 +102,14 @@ class Macdermotti {
         
         if (this.flashCount === 2) {
             this.speed.angle = this.speed.angle > -90 ? this.speed.angle - 2 : this.speed.angle + 2;
-        } else if (this.flashCount == 0) {
+        } else if (this.flashCount === 0) {
             this.initSpeed();
         }
         this.shape.position = this.shape.position + this.speed;        
-        
+
         const boundingBox = new Rectangle(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);        
-        if (this.flashCount == 0 && !boundingBox.contains(this.shape.position)) {
-            this.initPositionAttributes();
+        if (this.flashCount === 0 && !boundingBox.contains(this.shape.position)) {
+            this.reset();
         }
     }
 }
