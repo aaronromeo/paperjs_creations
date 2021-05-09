@@ -23,6 +23,8 @@ CANVAS_HEIGHT = document.querySelector('#myCanvas').clientHeight - CANVAS_BORDER
 CANVAS_OFFSET = CANVAS_HEIGHT * 0.5;
 NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH / 200.0);
 
+FLASH_SEGMENTS = Math.floor(FLASH_CYCLE_DURATION / MIN_FLICKER_DURATION);
+
 class Macdermotti {
     constructor() {
         this.male = 
@@ -39,20 +41,18 @@ class Macdermotti {
     }
 
     initFlashAttributes() {
-        this.flashCycleOffset = Math.random() * FLASH_CYCLE_DURATION;
-        if (this.flashCycleOffset < FLASH_CYCLE_1_OFF) {
-            this.flashCount = 1;
-        } else if (this.flashCycleOffset < FLASH_CYCLE_2_OFF) {
-            this.flashCount = 2;
-        } else {
-            this.flashCount = 0;
-        }
-        this.lastFlashOn = 0;
+        this.flashOffset = Math.floor(FLASH_SEGMENTS * Math.random());
+        this.flash1Pos = Math.floor(
+            (FLASH_CYCLE_1_ON + ((FLASH_CYCLE_1_OFF - FLASH_CYCLE_1_ON) * Math.random())) / MIN_FLICKER_DURATION
+        );
+        this.flash2Pos = this.male ? Math.floor(
+            (FLASH_CYCLE_2_ON + ((FLASH_CYCLE_2_OFF - FLASH_CYCLE_2_ON) * Math.random())) / MIN_FLICKER_DURATION
+        ) : this.flash1Pos;
     }
 
     initPositionAttributes() {
         let posX = CANVAS_WIDTH * 1.0 * Math.random();
-        let posY = CANVAS_HEIGHT * 0.25 * Math.random();
+        let posY = CANVAS_HEIGHT * 0.40 * Math.random();
         this.shape = new Shape.Circle(
             new Point(0, 0),
             0,
@@ -60,8 +60,9 @@ class Macdermotti {
         this.shape.position = (
             new Point(posX, CANVAS_HEIGHT - posY)
         );
+
         this.shape.radius = 
-            (((this.shape.position.y - CANVAS_OFFSET) / CANVAS_OFFSET) * 3.5) + 1.0;
+            (((this.shape.position.y - CANVAS_OFFSET) * 4.0) / (CANVAS_HEIGHT - CANVAS_OFFSET)) + 0.5;
         this.shape.shadowBlur = 20 - this.shape.radius;
         this.shape.shadowColor = FLASH_BLUR_COLOUR;
         this.shape.fillColor = FLASH_COLOUR;
@@ -70,28 +71,19 @@ class Macdermotti {
     }
 
     initSpeed() {
-        this.speed = new Point(this.shape.radius * 1.0, this.shape.radius * 0.25) * Point.random();
+        this.speed = new Point((this.shape.radius * 0.5) + 0.5, (this.shape.radius * 0.125) + 0.125) * Point.random();
         this.speed.angle = Math.random() < 0.5 ? Math.random() * -20 : 180 + (Math.random() * 20);
     }
 
-    flicker() {
-        const now = Date.now();
-        const flashCyclePosition = (now + this.flashCycleOffset) % FLASH_CYCLE_DURATION;
-        const flashDuration = this.male ? (MIN_FLASH_DURATION + Math.random() * FLASH_DURATION_VARIABILITY) : MIN_FLASH_DURATION;
+    currentSegment() {
+        return (Math.ceil(Date.now() / MIN_FLICKER_DURATION) + this.flashOffset) % FLASH_SEGMENTS;        
+    }
 
-        if (this.shape.opacity && (now - this.lastFlashOn) > flashDuration) {
+    flicker() {
+        if (this.currentSegment() === this.flash1Pos || this.currentSegment() === this.flash2Pos) {
+            this.shape.opacity = 1;
+        } else {
             this.shape.opacity = 0;
-            this.lastFlashOn = 0;
-        } else if (this.male && flashCyclePosition > FLASH_CYCLE_1_ON && flashCyclePosition < FLASH_CYCLE_1_OFF && this.flashCount < 1) {
-            this.shape.opacity = 1;
-            this.lastFlashOn = now;
-            this.flashCount = 1;
-        } else if (flashCyclePosition > FLASH_CYCLE_2_ON && flashCyclePosition < FLASH_CYCLE_2_OFF && this.flashCount < 2) {
-            this.shape.opacity = 1;
-            this.lastFlashOn = now;
-            this.flashCount = 2;
-        } else if (flashCyclePosition > FLASH_CYCLE_2_OFF && this.flashCount === 2) {
-            this.flashCount = 0;
         }
     }
 
@@ -100,15 +92,15 @@ class Macdermotti {
             return;
         }
         
-        if (this.flashCount === 2) {
+        if (this.currentSegment() === this.flash2Pos) {
             this.speed.angle = this.speed.angle > -90 ? this.speed.angle - 2 : this.speed.angle + 2;
-        } else if (this.flashCount === 0) {
+        } else if (this.currentSegment() > this.flash2Pos) {
             this.initSpeed();
         }
         this.shape.position = this.shape.position + this.speed;        
 
-        const boundingBox = new Rectangle(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);        
-        if (this.flashCount === 0 && !boundingBox.contains(this.shape.position)) {
+        const boundingBox = new Rectangle(0, CANVAS_OFFSET, CANVAS_WIDTH, CANVAS_HEIGHT - CANVAS_OFFSET);    
+        if (this.currentSegment() > this.flash2Pos && !boundingBox.contains(this.shape.position)) {
             this.reset();
         }
     }
