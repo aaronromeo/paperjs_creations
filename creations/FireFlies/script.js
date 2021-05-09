@@ -14,14 +14,14 @@ FLASH_CYCLE_1_ON = 0.0;
 FLASH_CYCLE_1_OFF = 500;
 FLASH_CYCLE_2_ON = 1500
 FLASH_CYCLE_2_OFF = 2000;
-MIN_FLASH_DURATION = 200;
+MIN_FLICKER_DURATION = 300;
 FLASH_DURATION_VARIABILITY = 800;
 NUMBER_OF_FLIES = 15;
 CANVAS_BORDER = 10;
 CANVAS_WIDTH = document.querySelector('#myCanvas').clientWidth - CANVAS_BORDER;
 CANVAS_HEIGHT = document.querySelector('#myCanvas').clientHeight - CANVAS_BORDER;
 CANVAS_OFFSET = CANVAS_HEIGHT * 0.5;
-NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH / 200.0);
+NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH / 100.0);
 
 FLASH_SEGMENTS = Math.floor(FLASH_CYCLE_DURATION / MIN_FLICKER_DURATION);
 
@@ -41,6 +41,7 @@ class Macdermotti {
     }
 
     initFlashAttributes() {
+        this.maxOpacity = (0.5 * Math.random()) + 0.5;
         this.flashOffset = Math.floor(FLASH_SEGMENTS * Math.random());
         this.flash1Pos = Math.floor(
             (FLASH_CYCLE_1_ON + ((FLASH_CYCLE_1_OFF - FLASH_CYCLE_1_ON) * Math.random())) / MIN_FLICKER_DURATION
@@ -71,8 +72,8 @@ class Macdermotti {
     }
 
     initSpeed() {
-        this.speed = new Point((this.shape.radius * 0.5) + 0.5, (this.shape.radius * 0.125) + 0.125) * Point.random();
-        this.speed.angle = Math.random() < 0.5 ? Math.random() * -20 : 180 + (Math.random() * 20);
+        this.speed = new Point((this.shape.radius * 0.5) + 0.5, (this.shape.radius * 0.125) + 0.125);
+        this.speed.angle = Math.random() < 0.5 ? (Math.random() * -20) - 10 : 180 + (Math.random() * 20) + 10;
     }
 
     currentSegment() {
@@ -81,7 +82,7 @@ class Macdermotti {
 
     flicker() {
         if (this.currentSegment() === this.flash1Pos || this.currentSegment() === this.flash2Pos) {
-            this.shape.opacity = 1;
+            this.shape.opacity = this.maxOpacity;
         } else {
             this.shape.opacity = 0;
         }
