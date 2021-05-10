@@ -17,9 +17,8 @@ FLASH_CYCLE_2_OFF = 2000;
 MIN_FLICKER_DURATION = 300;
 FLASH_DURATION_VARIABILITY = 800;
 NUMBER_OF_FLIES = 15;
-CANVAS_BORDER = 10;
-CANVAS_WIDTH = document.querySelector('#myCanvas').clientWidth - CANVAS_BORDER;
-CANVAS_HEIGHT = document.querySelector('#myCanvas').clientHeight - CANVAS_BORDER;
+CANVAS_WIDTH = document.querySelector('#fireflyCanvas').clientWidth;
+CANVAS_HEIGHT = document.querySelector('#fireflyCanvas').clientHeight;
 CANVAS_OFFSET = CANVAS_HEIGHT * 0.4;
 NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH / 100.0);
 
@@ -28,7 +27,7 @@ FLASH_SEGMENTS = Math.floor(FLASH_CYCLE_DURATION / MIN_FLICKER_DURATION);
 class Macdermotti {
     constructor() {
         this.male = 
-            Math.random() < 0.5 ? 
+            Math.random() < 0.4 ? 
             true : 
             false;
         this.reset();
