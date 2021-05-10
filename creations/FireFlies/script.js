@@ -20,7 +20,7 @@ NUMBER_OF_FLIES = 15;
 CANVAS_BORDER = 10;
 CANVAS_WIDTH = document.querySelector('#myCanvas').clientWidth - CANVAS_BORDER;
 CANVAS_HEIGHT = document.querySelector('#myCanvas').clientHeight - CANVAS_BORDER;
-CANVAS_OFFSET = CANVAS_HEIGHT * 0.5;
+CANVAS_OFFSET = CANVAS_HEIGHT * 0.4;
 NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH / 100.0);
 
 FLASH_SEGMENTS = Math.floor(FLASH_CYCLE_DURATION / MIN_FLICKER_DURATION);
@@ -41,7 +41,7 @@ class Macdermotti {
     }
 
     initFlashAttributes() {
-        this.maxOpacity = (0.5 * Math.random()) + 0.5;
+        this.maxOpacity = (0.7 * Math.random()) + 0.3;
         this.flashOffset = Math.floor(FLASH_SEGMENTS * Math.random());
         this.flash1Pos = Math.floor(
             (FLASH_CYCLE_1_ON + ((FLASH_CYCLE_1_OFF - FLASH_CYCLE_1_ON) * Math.random())) / MIN_FLICKER_DURATION
