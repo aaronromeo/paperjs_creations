@@ -71,36 +71,50 @@ class Macdermotti {
     }
 
     initSpeed() {
+        this.initialAngle = Math.random() < 0.5 ? (Math.random() * -20) - 10 : -180 + (Math.random() * 20) + 10;
         this.speed = new Point((this.shape.radius * 0.5) + 0.5, (this.shape.radius * 0.125) + 0.125);
-        this.speed.angle = Math.random() < 0.5 ? (Math.random() * -20) - 10 : 180 + (Math.random() * 20) + 10;
+        this.speed.angle = this.initialAngle;
     }
 
-    currentSegment() {
-        return (Math.ceil(Date.now() / MIN_FLICKER_DURATION) + this.flashOffset) % FLASH_SEGMENTS;        
+    currentSegment(ceil = false) {
+        const dateMultiplier = Date.now() / MIN_FLICKER_DURATION;
+        const dateMultiplierWithOffset = ceil ? 
+            (Math.ceil(dateMultiplier) + this.flashOffset) :
+            dateMultiplier + this.flashOffset;
+        return dateMultiplierWithOffset % FLASH_SEGMENTS;
     }
 
     flicker() {
-        if (this.currentSegment() === this.flash1Pos || this.currentSegment() === this.flash2Pos) {
-            this.shape.opacity = this.maxOpacity;
-        } else {
-            this.shape.opacity = 0;
-        }
+        this.shape.opacity = this.opacity();
     }
 
+    opacity() {
+        const segment = this.currentSegment();
+        return Math.max(
+            this.maxOpacity - Math.pow( segment - this.flash1Pos, 2),
+            this.maxOpacity - Math.pow( segment - this.flash2Pos, 2),
+            0,
+        );
+    }
+    
     move() {
         if (!this.male) {
             return;
         }
         
-        if (this.currentSegment() === this.flash2Pos) {
-            this.speed.angle = this.speed.angle > -90 ? this.speed.angle - 2 : this.speed.angle + 2;
-        } else if (this.currentSegment() > this.flash2Pos) {
+        const segment = this.currentSegment(true);
+        if (segment === this.flash2Pos) {
+            this.speed.angle = this.initialAngle > -90 ? 
+                Math.max(this.initialAngle - 25 - (segment * 2), -45) : 
+                Math.min(this.initialAngle + 25 - (segment * 2), -135);
+        } else if (segment === 0) {
             this.initSpeed();
         }
         this.shape.position = this.shape.position + this.speed;        
 
         const boundingBox = new Rectangle(0, CANVAS_OFFSET, CANVAS_WIDTH, CANVAS_HEIGHT - CANVAS_OFFSET);    
-        if (this.currentSegment() > this.flash2Pos && !boundingBox.contains(this.shape.position)) {
+        if (segment > this.flash2Pos && !boundingBox.contains(this.shape.position)) {
+            this.shape.remove();
             this.reset();
         }
     }
