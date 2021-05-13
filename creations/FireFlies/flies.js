@@ -20,7 +20,7 @@ CANVAS_WIDTH = document.querySelector('#fireflyCanvas').clientWidth;
 CANVAS_HEIGHT = document.querySelector('#fireflyCanvas').clientHeight;
 CANVAS_OFFSET = CANVAS_HEIGHT * 0.4;
 
-NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH / 100.0);
+NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH / 200.0);
 FLASH_SEGMENTS = Math.floor(FLASH_CYCLE_DURATION / MIN_FLICKER_DURATION);
 
 class Macdermotti {
