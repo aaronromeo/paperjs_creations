@@ -27,9 +27,7 @@ FLASH_SEGMENTS = Math.floor(FLASH_CYCLE_DURATION / MIN_FLICKER_DURATION);
 class Macdermotti {
     constructor() {
         this.male = 
-            Math.random() < 0.4 ? 
-            true : 
-            false;
+            Math.random() < 0.4 ? true : false;
         this.reset();
     }
 
