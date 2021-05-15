@@ -60,9 +60,20 @@ class Macdermotti {
 
         this.shape.radius = 
             (((this.shape.position.y - CANVAS_OFFSET) * 4.0) / (CANVAS_HEIGHT - CANVAS_OFFSET)) + 0.5;
-        this.shape.shadowBlur = 20 - this.shape.radius;
-        this.shape.shadowColor = FLASH_BLUR_COLOUR;
-        this.shape.fillColor = FLASH_COLOUR;
+        // this.shape.radius = 20;
+        // this.shape.shadowBlur = 20 - this.shape.radius;
+        // this.shape.shadowColor = FLASH_BLUR_COLOUR;
+        // this.shape.fillColor = FLASH_COLOUR;
+
+        this.shape.fillColor = {
+            gradient: {
+                stops: [FLASH_COLOUR, FLASH_BLUR_COLOUR, 'black'],
+                radial: true
+            },
+            origin: this.shape.position,
+            destination: this.shape.bounds.rightCenter
+           }
+        this.shape.fillColor.highlight = this.shape.position;
         this.shape.opacity = 0;
         this.shape.blendMode = 'soft-light';
     }
