@@ -1,4 +1,5 @@
-# PaperJS Creations
+# Creations
+My original digital art creations
 
 ## Getting Started
 * Install with `yarn install`
