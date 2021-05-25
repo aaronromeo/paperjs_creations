@@ -1,6 +1,16 @@
 <head>
-    <script type="text/javascript" src="../../node_modules/acorn/dist/acorn.js"></script>
-	<script type="text/javascript" src="../../node_modules/paper/dist/paper-full.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/acorn/8.2.4/acorn.min.js"></script>
+	<script>
+		if (typeof acorn == "undefined") {
+			document.write(decodeURIComponent('%3Cscript src="../../node_modules/acorn/dist/acorn.js" %3E%3C/script%3E'));
+		}
+	</script>
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/paper.js/0.12.15/paper-full.min.js"></script>
+	<script>
+		if (typeof paper == "undefined") {
+			document.write(decodeURIComponent('%3Cscript src="../../node_modules/paper/dist/paper-full.js" %3E%3C/script%3E'));
+		}
+	</script>
 	<!-- <script src="./public/js/bundle.js" charset="utf-8"></script> -->
 	<script type="text/paperscript" src="./trees.js" canvas="treesCanvas"></script>
 	<script type="text/paperscript" src="./stars.js" canvas="starsCanvas"></script>
