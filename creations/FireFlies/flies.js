@@ -20,7 +20,8 @@ CANVAS_WIDTH = document.querySelector('#fireflyCanvas').clientWidth;
 CANVAS_HEIGHT = document.querySelector('#fireflyCanvas').clientHeight;
 CANVAS_OFFSET = CANVAS_HEIGHT * 0.5;
 
-NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH);
+NUMBER_OF_FLIES = Math.ceil(CANVAS_WIDTH * 2.0);
+// NUMBER_OF_FLIES = 1;
 FLASH_SEGMENTS = Math.floor(FLASH_CYCLE_DURATION / MIN_FLICKER_DURATION);
 
 class Macdermotti {
@@ -49,7 +50,7 @@ class Macdermotti {
 
     initPositionAttributes() {
         let posX = CANVAS_WIDTH * 1.0 * Math.random();
-        let posY = CANVAS_OFFSET * Math.random();
+        let posY = CANVAS_OFFSET - CANVAS_OFFSET * Math.pow(Math.random(), 8);
         this.shape = new Shape.Circle(
             new Point(0, 0),
             0,
@@ -61,12 +62,8 @@ class Macdermotti {
 
         this.shape.radius =
             (Math.pow((this.shape.position.y - CANVAS_OFFSET), 1.3) / (CANVAS_HEIGHT - CANVAS_OFFSET)) + 0.5;
-        // this.shape.radius = 20;
-        // this.shape.shadowBlur = 20 - this.shape.radius;
-        // this.shape.shadowColor = FLASH_BLUR_COLOUR;
-        // this.shape.fillColor = FLASH_COLOUR;
 
-        this.shape.fillColor = {
+            this.shape.fillColor = {
             gradient: {
                 stops: [FLASH_COLOUR, FLASH_BLUR_COLOUR, 'black'],
                 radial: true
@@ -80,15 +77,15 @@ class Macdermotti {
     }
 
     initSpeed() {
-        this.initialAngle = Math.random() < 0.5 ? (Math.random() * -20) - 10 : -180 + (Math.random() * 20) + 10;
+        this.initialAngle = Math.pow(Math.random(), 2) * (Math.random() >  0.5 ? -45.0 : -135.0);
         this.speed = new Point((this.shape.radius * 0.5) + 0.5, (this.shape.radius * 0.125) + 0.125);
         this.speed.angle = this.initialAngle;
     }
 
     currentSegment(ceil = false) {
-        const dateMultiplier = Date.now() / MIN_FLICKER_DURATION;
-        const dateMultiplierWithOffset = ceil ?
-            (Math.ceil(dateMultiplier) + this.flashOffset) :
+        let dateMultiplier = Date.now() / MIN_FLICKER_DURATION;
+        dateMultiplier = ceil ? Math.ceil(dateMultiplier) : dateMultiplier;
+        const dateMultiplierWithOffset =
             dateMultiplier + this.flashOffset;
         return dateMultiplierWithOffset % FLASH_SEGMENTS;
     }
@@ -107,22 +104,24 @@ class Macdermotti {
     }
 
     move() {
+        // this.shape.content = Math.round(this.shape.radius) * 10
         if (!this.male) {
             return;
         }
 
-        const segment = this.currentSegment(true);
-        if (segment === this.flash2Pos) {
-            this.speed.angle = this.initialAngle > -90 ?
-                Math.max(this.initialAngle - 25 - (segment * 3.0), -45) :
-                Math.min(this.initialAngle + 25 - (segment * 3.0), -135);
-        } else if (segment === 0) {
+        const segment = this.currentSegment();
+        const ceilSegment = Math.ceil(segment);
+        if (ceilSegment === this.flash2Pos) {
+            this.speed.angle = this.initialAngle + (Math.abs(this.initialAngle) - 90) * Math.pow((segment % 1), 2.0);
+        } else if (ceilSegment === 0) {
             this.initSpeed();
+        } else if (ceilSegment === this.flash1Pos) {
+            this.speed.angle = this.initialAngle;
         }
         this.shape.position = this.shape.position + this.speed;
 
-        const boundingBox = new Rectangle(0, CANVAS_OFFSET, CANVAS_WIDTH, CANVAS_HEIGHT);
-        if (segment > this.flash2Pos && !boundingBox.contains(this.shape.position)) {
+        const boundingBox = new Rectangle(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        if (ceilSegment > this.flash2Pos && !boundingBox.contains(this.shape.position)) {
             this.shape.remove();
             this.reset();
         }
