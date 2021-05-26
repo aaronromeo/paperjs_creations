@@ -1,4 +1,4 @@
-FIELD_COLOUR = '#030804';
+FIELD_COLOUR = '#15361b';
 CANVAS_WIDTH = document.querySelector('#starsCanvas').clientWidth;
 CANVAS_HEIGHT = document.querySelector('#starsCanvas').clientHeight;
 TERRA_CURVE_HEIGHT = CANVAS_WIDTH / 28.8;

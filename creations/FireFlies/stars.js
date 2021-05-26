@@ -1,8 +1,10 @@
-FLASH_COLOUR = '#ece8fc'; 
+FLASH_COLOUR = '#ece8fc';
 FLASH_BLUR_COLOUR = '#a9a4bd';
 CANVAS_WIDTH = document.querySelector('#starsCanvas').clientWidth;
 CANVAS_HEIGHT = document.querySelector('#starsCanvas').clientHeight;
-NUMBER_OF_STARS = Math.ceil(CANVAS_WIDTH / 10.0);
+NUMBER_OF_STARS = Math.ceil(CANVAS_WIDTH * CANVAS_HEIGHT / 8000.0);
+// console.log(NUMBER_OF_STARS);
+// console.log(CANVAS_WIDTH * CANVAS_HEIGHT);
 
 class Star {
     constructor() {
@@ -44,7 +46,7 @@ class Star {
 
 const generateStars = function(starCount = NUMBER_OF_STARS) {
     const stars = []
-    for(let star = 0; star < starCount; star++) {        
+    for(let star = 0; star < starCount; star++) {
         stars[star] = new Star();
     }
     return stars;
