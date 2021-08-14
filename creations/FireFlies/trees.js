@@ -5,7 +5,7 @@ CANVAS_HEIGHT = document.querySelector('#starsCanvas').clientHeight;
 TERRA_CURVE_HEIGHT = CANVAS_WIDTH / 28.8;
 TREE_LINE = CANVAS_HEIGHT * 0.66;
 GRASS_LINE = CANVAS_HEIGHT * 0.5;
-TREE_HEIGHT = CANVAS_HEIGHT * 0.20;
+TREE_HEIGHT = CANVAS_HEIGHT * 0.2;
 
 class TreeLine {
   drawTree(pointX) {
